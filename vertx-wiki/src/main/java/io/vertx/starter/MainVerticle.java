@@ -3,9 +3,10 @@ package io.vertx.starter;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.LoggerFactory;
+import org.slf4j.LoggerFactory;
 import io.vertx.ext.jdbc.JDBCClient;
 import org.slf4j.Logger;
+import io.vertx.ext.sql.SQLConnection;
 
 public class MainVerticle extends AbstractVerticle {
 
