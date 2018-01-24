@@ -12,9 +12,16 @@ public class MainVerticle extends AbstractVerticle {
         .listen(8080);
   }*/
 
+  /**
+   * By having each method returning a Future object, the implementation of the start method
+   * becomes a composition
+   * @param startFuture
+   * @throws Exception
+     */
   @Override
   public void start(Future<Void> startFuture) throws Exception{
-    startFuture.complete();
+    Future<Void> steps = prepareDatabase().compose(v -> startHttpServer());
+    steps.setHandler(startFuture.completer());
   }
 
   private Future<Void> prepareDatabase() {
@@ -28,5 +35,5 @@ public class MainVerticle extends AbstractVerticle {
     // (...)
     return future;
   }
-  
+
 }
