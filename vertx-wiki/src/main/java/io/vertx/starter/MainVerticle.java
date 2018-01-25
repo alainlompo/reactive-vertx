@@ -2,11 +2,18 @@ package io.vertx.starter;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
+import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
-import org.slf4j.LoggerFactory;
+
+import io.vertx.ext.web.Router;
+import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.jdbc.JDBCClient;
-import org.slf4j.Logger;
 import io.vertx.ext.sql.SQLConnection;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public class MainVerticle extends AbstractVerticle {
 
@@ -73,8 +80,49 @@ public class MainVerticle extends AbstractVerticle {
 
   private Future<Void> startHttpServer() {
     Future<Void> future = Future.future();
-    // (...)
+    // Completing the http server
+    HttpServer server = vertx.createHttpServer();
+
+    Router router = Router.router(vertx);
+    router.get("/").handler(this::indexHandler);
+    router.get("/wiki/:page").handler(this::pageRenderingHandler);
+    router.post().handler(BodyHandler.create());
+    router.post("/save").handler(this::pageUpdateHandler);
+    router.post("/create").handler(this::pageCreateHandler);
+    router.post("/delete").handler(this::pageDeletionHandler);
+
+    server
+      .requestHandler(router::accept)
+      .listen(9090, ar -> {
+        if (ar.succeeded()) {
+          LOGGER.info("Http server running on port 9090");
+          future.complete();
+        } else {
+          LOGGER.error("Could not start http server...", ar.cause());
+          future.fail(ar.cause());
+        }
+      });
+
     return future;
   }
 
+  private void indexHandler(RoutingContext context) {
+    
+  }
+
+  private void pageRenderingHandler(RoutingContext context) {
+    // TODO: implement the method
+  }
+
+  private void pageUpdateHandler(RoutingContext context) {
+    // TODO: do it
+  }
+
+  private void pageCreateHandler(RoutingContext context) {
+    // TODO: do it
+  }
+
+  private void pageDeletionHandler(RoutingContext context) {
+    // TODO: do it.
+  }
 }
