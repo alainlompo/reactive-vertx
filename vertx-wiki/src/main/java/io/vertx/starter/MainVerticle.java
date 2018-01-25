@@ -14,6 +14,11 @@ import io.vertx.ext.sql.SQLConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import io.vertx.ext.web.templ.FreeMarkerTemplateEngine;
+
 
 public class MainVerticle extends AbstractVerticle {
 
@@ -24,9 +29,11 @@ public class MainVerticle extends AbstractVerticle {
   private static final String SQL_ALL_PAGES = "select Name from Pages";
   private static final String SQL_DELETE_PAGE = "delete from Pages where Id = ?";
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(MainVerticle.class);
 
   private JDBCClient dbClient;
-  private static final Logger LOGGER = LoggerFactory.getLogger(MainVerticle.class);
+
+  private final FreeMarkerTemplateEngine templateEngine = FreeMarkerTemplateEngine.create();
 
   /*@Override
   public void start() {
@@ -107,7 +114,39 @@ public class MainVerticle extends AbstractVerticle {
   }
 
   private void indexHandler(RoutingContext context) {
-    
+    dbClient.getConnection(car -> {
+      if (car.succeeded()) {
+        SQLConnection connection = car.result();
+        connection.query(SQL_ALL_PAGES, res -> {
+          connection.close();
+
+          if (res.succeeded()) {
+            List<String> pages = res.result()
+              .getResults()
+              .stream()
+              .map(json -> json.getString(0))
+              .sorted()
+              .collect(Collectors.toList());
+
+            context.put("title", "Wiki home");
+            context.put("pages", pages);
+
+            templateEngine.render(context, "templates", "/index.ftl", ar -> {
+              if (ar.succeeded()) {
+                context.response().putHeader("Content-Type", "text/html");
+                context.response().end(ar.result());
+              } else {
+                context.fail(ar.cause());
+              }
+            });
+          } else {
+            context.fail(res.cause());
+          }
+        });
+      } else {
+        context.fail(car.cause());
+      }
+    });
   }
 
   private void pageRenderingHandler(RoutingContext context) {
