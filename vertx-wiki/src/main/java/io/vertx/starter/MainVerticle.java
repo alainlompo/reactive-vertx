@@ -6,13 +6,12 @@ import io.vertx.core.Future;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-
+import io.vertx.ext.jdbc.JDBCClient;
+import io.vertx.ext.sql.SQLConnection;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
-import io.vertx.ext.jdbc.JDBCClient;
-import io.vertx.ext.sql.SQLConnection;
-
+import io.vertx.ext.web.templ.FreeMarkerTemplateEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +64,7 @@ public class MainVerticle extends AbstractVerticle {
     // Completing the implementation below
 
     dbClient = JDBCClient.createShared(vertx, new JsonObject()
-    .put("url", "jdbc:hsqldb:file:db/wiki")
+      .put("url", "jdbc:hsqldb:file:db/wiki")
       .put("driver_class", "org.hsqldb.jdbcDriver")
       .put("max_pool_size", "30")
     );
