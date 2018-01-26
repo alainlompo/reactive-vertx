@@ -48,6 +48,7 @@ public class MainVerticle extends AbstractVerticle {
   private static final String SQL_SAVE_PAGE = "update Pages set Content = ? where Id = ?";
   private static final String SQL_ALL_PAGES = "select Name from Pages";
   private static final String SQL_DELETE_PAGE = "delete from Pages where Id = ?";
+  public static final String TITLE_KEY = "title";
   // end::sql-fields[]
 
   // tag::db-and-logger[]
@@ -55,6 +56,8 @@ public class MainVerticle extends AbstractVerticle {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MainVerticle.class);
   // end::db-and-logger[]
+
+  private static final String LOCATION_HEADER = "Location";
 
   // tag::prepareDatabase[]
   private Future<Void> prepareDatabase() {
@@ -126,7 +129,7 @@ public class MainVerticle extends AbstractVerticle {
           connection.close();
           if (res.succeeded()) {
             context.response().setStatusCode(303);
-            context.response().putHeader("Location", "/");
+            context.response().putHeader(LOCATION_HEADER, "/");
             context.response().end();
           } else {
             context.fail(res.cause());
@@ -147,7 +150,7 @@ public class MainVerticle extends AbstractVerticle {
       location = "/";
     }
     context.response().setStatusCode(303);
-    context.response().putHeader("Location", location);
+    context.response().putHeader(LOCATION_HEADER, location);
     context.response().end();
   }
   // end::pageCreateHandler[]
@@ -170,7 +173,7 @@ public class MainVerticle extends AbstractVerticle {
               .sorted()
               .collect(Collectors.toList());
 
-            context.put("title", "Wiki home");  // <2>
+            context.put(TITLE_KEY, "Wikipeaks home");  // <2>
             context.put("pages", pages);
             templateEngine.render(context, "templates", "/index.ftl", ar -> {   // <3>
               if (ar.succeeded()) {
@@ -195,7 +198,7 @@ public class MainVerticle extends AbstractVerticle {
   // tag::pageUpdateHandler[]
   private void pageUpdateHandler(RoutingContext context) {
     String id = context.request().getParam("id");   // <1>
-    String title = context.request().getParam("title");
+    String title = context.request().getParam(TITLE_KEY);
     String markdown = context.request().getParam("markdown");
     boolean newPage = "yes".equals(context.request().getParam("newPage"));  // <2>
 
@@ -213,7 +216,7 @@ public class MainVerticle extends AbstractVerticle {
           connection.close();
           if (res.succeeded()) {
             context.response().setStatusCode(303);    // <5>
-            context.response().putHeader("Location", "/wiki/" + title);
+            context.response().putHeader(LOCATION_HEADER, "/wiki/" + title);
             context.response().end();
           } else {
             context.fail(res.cause());
@@ -252,7 +255,7 @@ public class MainVerticle extends AbstractVerticle {
 
             context.put("title", page);
             context.put("id", id);
-            context.put("newPage", fetch.result().getResults().size() == 0 ? "yes" : "no");
+            context.put("newPage", fetch.result().getResults().isEmpty() ? "yes" : "no");
             context.put("rawContent", rawContent);
             context.put("content", Processor.process(rawContent));  // <3>
             context.put("timestamp", new Date().toString());
@@ -285,7 +288,7 @@ public class MainVerticle extends AbstractVerticle {
   }
   // end::start[]
 
-  public void anotherStart(Future<Void> startFuture) throws Exception {
+  public void anotherStart(Future<Void> startFuture) {
     // tag::another-start[]
     Future<Void> steps = prepareDatabase().compose(v -> startHttpServer());
     steps.setHandler(ar -> {  // <1>
