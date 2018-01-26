@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package io.vertx.guides.wiki;
+package org.techschulung.wikipeaks;
 
 import com.github.rjeschke.txtmark.Processor;
 import io.vertx.core.AbstractVerticle;

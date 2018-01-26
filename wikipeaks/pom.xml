@@ -23,12 +23,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>io.vertx</groupId>
-  <artifactId>wiki-step-1</artifactId>
+  <artifactId>wikipeaks</artifactId>
   <version>1.1.0</version>
 
   <properties>
     <vertx.version>3.5.0</vertx.version>
-    <main.verticle>io.vertx.guides.wiki.MainVerticle</main.verticle>
+    <main.verticle>org.techschulung.wikipeaks.MainVerticle</main.verticle>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
