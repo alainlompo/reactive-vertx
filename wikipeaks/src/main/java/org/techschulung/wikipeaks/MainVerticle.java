@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class MainVerticle extends AbstractVerticle {
@@ -249,6 +250,24 @@ public class MainVerticle extends AbstractVerticle {
           if (fetch.succeeded()) {
             // TODO: Collect here the snippets of text matching the search
             // There should also be a link to the source page which text is the page's title
+            List<PageContentPart> pageContentParts
+                    = fetch.result().getResults()
+                    .stream()
+                    .map(this::mapContentPart)
+                    .map(pageContentPart -> reduced(pageContentPart, searchText))
+                    .collect(Collectors.toList());
+
+            context.put(TITLE_KEY, "Search results....");
+            context.put("pageContentParts", pageContentParts);
+            templateEngine.render(context, "templates", "/search.ftl", ar -> {
+              if (ar.succeeded()) {
+                context.response().putHeader("Content-Type", "text/html");
+                context.response().end(ar.result());
+              } else {
+                context.fail(ar.cause());
+              }
+            });
+
 
           } else {
             context.fail(fetch.cause());
@@ -259,9 +278,8 @@ public class MainVerticle extends AbstractVerticle {
         context.fail(car.cause());
       }
     });
-
-
   }
+
   private void pageRenderingHandler(RoutingContext context) {
     String page = context.request().getParam("page");   // <1>
 
@@ -326,5 +344,44 @@ public class MainVerticle extends AbstractVerticle {
       }
     });
     // end::another-start[]
+  }
+
+  private PageContentPart mapContentPart(JsonArray jsonArray) {
+    return new PageContentPart(jsonArray.getString(1), jsonArray.getString(2));
+  }
+
+  private PageContentPart reduced(PageContentPart pageContentPart, String searchCriteria)  {
+    if (pageContentPart == null) {
+      return null;
+    }
+
+    pageContentPart.setContentPart(
+            extractPart(pageContentPart.getContentPart(), searchCriteria, 7, 50).orElse("")
+    );
+
+    return pageContentPart;
+  }
+
+  /**
+   *
+   * @param source
+   * @param part
+   * @param extractionLenght: should be strictly superior to part's length
+   * @param upFrontLength: that small part before the searched component. upFrontLength + part.length should be
+   *                     strictly inferior to extractionLength
+   * @return The searched piece of String with its environning text
+   */
+  private Optional<String> extractPart(String source, String part, int extractionLenght, int upFrontLength) {
+    if (source == null || source.isEmpty() || part == null || part.isEmpty()) {
+      return Optional.empty();
+    }
+    int position = source.indexOf(part);
+    if (position - upFrontLength >= 0) {
+      return Optional.of(source.substring(position-upFrontLength, position-upFrontLength+extractionLenght));
+    } else if (position + extractionLenght < source.length()) {
+      return Optional.of(source.substring(position, position + extractionLenght));
+    } else {
+      return Optional.empty();
+    }
   }
 }
