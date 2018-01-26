@@ -201,7 +201,14 @@ public class MainVerticle extends AbstractVerticle {
   }
 
   private void pageCreateHandler(RoutingContext context) {
-    // TODO: do it
+    String pageName = context.request().getParam("name");
+    String location = "/wiki/" + pageName;
+    if (pageName == null || pageName.isEmpty()) {
+      location = "/";
+    }
+    context.response().setStatusCode(303);
+    context.response().putHeader("Location", location);
+    context.response().end();
   }
 
   private void pageDeletionHandler(RoutingContext context) {
