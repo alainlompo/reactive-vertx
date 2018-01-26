@@ -240,6 +240,23 @@ public class MainVerticle extends AbstractVerticle {
   }
 
   private void pageDeletionHandler(RoutingContext context) {
-    // TODO: do it.
+    String id = context.request().getParam("id");
+    dbClient.getConnection(car -> {
+      if (car.succeeded()) {
+        SQLConnection connection = car.result();
+        connection.updateWithParams(SQL_DELETE_PAGE, new JsonArray().add(id), res -> {
+          connection.close();
+          if (res.succeeded()) {
+            context.response().setStatusCode(303);
+            context.response().putHeader("Location", "/");
+            context.response().end();
+          } else {
+            context.fail(res.cause());
+          }
+        });
+      } else {
+        context.fail(car.cause());
+      }
+    });
   }
 }
