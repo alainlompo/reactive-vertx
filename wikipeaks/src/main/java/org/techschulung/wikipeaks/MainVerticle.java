@@ -36,9 +36,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * @author <a href="https://julien.ponge.org/">Julien Ponge</a>
- */
 public class MainVerticle extends AbstractVerticle {
 
   // tag::sql-fields[]
@@ -48,6 +45,9 @@ public class MainVerticle extends AbstractVerticle {
   private static final String SQL_SAVE_PAGE = "update Pages set Content = ? where Id = ?";
   private static final String SQL_ALL_PAGES = "select Name from Pages";
   private static final String SQL_DELETE_PAGE = "delete from Pages where Id = ?";
+
+  private static final String SQL_SEARCH_PAGES = "Select * from Pages where Content like ?";
+
   public static final String TITLE_KEY = "title";
   // end::sql-fields[]
 
@@ -102,6 +102,7 @@ public class MainVerticle extends AbstractVerticle {
     router.post("/save").handler(this::pageUpdateHandler);
     router.post("/create").handler(this::pageCreateHandler);
     router.post("/delete").handler(this::pageDeletionHandler);
+    router.post("/search").handler(this::pagesSearchHandler);
 
     server
       .requestHandler(router::accept)   // <5>
@@ -118,6 +119,7 @@ public class MainVerticle extends AbstractVerticle {
     return future;
   }
   // end::startHttpServer[]
+
 
   // tag::pageDeletionHandler[]
   private void pageDeletionHandler(RoutingContext context) {
@@ -235,6 +237,31 @@ public class MainVerticle extends AbstractVerticle {
       "\n" +
       "Feel-free to write in Markdown!\n";
 
+  private void pagesSearchHandler(RoutingContext context) {
+
+    String searchText = context.request().getParam("searchText");
+    dbClient.getConnection(car -> {
+      if (car.succeeded()) {
+        SQLConnection connection = car.result();
+        connection.queryWithParams(SQL_SEARCH_PAGES, new JsonArray().add(searchText), fetch -> {
+          connection.close();
+
+          if (fetch.succeeded()) {
+            // TODO: Collect here the snippets of text matching the search
+            // There should also be a link to the source page which text is the page's title
+
+          } else {
+            context.fail(fetch.cause());
+          }
+
+        });
+      } else {
+        context.fail(car.cause());
+      }
+    });
+
+
+  }
   private void pageRenderingHandler(RoutingContext context) {
     String page = context.request().getParam("page");   // <1>
 
