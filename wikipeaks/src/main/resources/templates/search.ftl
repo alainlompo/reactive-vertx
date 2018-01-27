@@ -1,15 +1,11 @@
 <#include "header.ftl">
 
-<#list context.pages>
-<h2>Pages:</h2>
-<ul>
-    <#items as page>
-        <li><a href="/wiki/${page}">${page}</a></li>
-    </#items>
-</ul>
-<#else>
-<p>The wiki is currently empty!</p>
-</#list>
+<div class="row">
+    <div class="col-md-12 mt-1">
+      <span class="float-xs-right">
+        <a class="btn btn-outline-primary" href="/" role="button" aria-pressed="true">Home</a>
+    </div>
+</div>
 
 <p>
     <#list context.pageContentParts as pageContentPart>

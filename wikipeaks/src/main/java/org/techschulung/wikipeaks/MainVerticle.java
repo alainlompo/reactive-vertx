@@ -240,18 +240,18 @@ public class MainVerticle extends AbstractVerticle {
     dbClient.getConnection(car -> {
       if (car.succeeded()) {
         SQLConnection connection = car.result();
-        connection.queryWithParams(SQL_SEARCH_PAGES, new JsonArray().add(searchText), fetch -> {
+        connection.queryWithParams(SQL_SEARCH_PAGES, new JsonArray().add("%" + searchText + "%"), fetch -> {
           connection.close();
 
           if (fetch.succeeded()) {
-            // TODO: Collect here the snippets of text matching the search
-            // There should also be a link to the source page which text is the page's title
             List<PageContentPart> pageContentParts
                     = fetch.result().getResults()
                     .stream()
                     .map(this::mapContentPart)
                     .map(pageContentPart -> reduced(pageContentPart, searchText))
                     .collect(Collectors.toList());
+
+            LOGGER.debug("Found {} pages that matches the {} search criteria", pageContentParts.size(), searchText);
 
             context.put(TITLE_KEY, "Search results....");
             context.put("pageContentParts", pageContentParts);
