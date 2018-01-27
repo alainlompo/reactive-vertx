@@ -8,9 +8,21 @@
         <div class="form-group">
           <input type="text" class="form-control" id="name" name="name" placeholder="New page name">
         </div>
-        <button type="submit" class="btn btn-primary">Create</button>
+        <button type="submit" class="btn btn-primary" id="createButton">Create</button>
       </form>
     </div>
+
+      <div class="float-xs-right">
+
+        <form class="form-inline" action="/search" method="post">
+            <div class="form-group">
+                <input type="text" class="form-control" id="searchText" name="searchText" placeHolder="Text to search in all pages">
+            </div>
+            <button type="submit" class="btn btn-primary" id="searchButton">Search</button>
+        </form>
+        </div>
+
+
     <h1 class="display-4">${context.title}</h1>
   </div>
 

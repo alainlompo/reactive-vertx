@@ -46,19 +46,22 @@ public class MainVerticle extends AbstractVerticle {
   private static final String SQL_SAVE_PAGE = "update Pages set Content = ? where Id = ?";
   private static final String SQL_ALL_PAGES = "select Name from Pages";
   private static final String SQL_DELETE_PAGE = "delete from Pages where Id = ?";
-
   private static final String SQL_SEARCH_PAGES = "Select * from Pages where Content like ?";
+  // end::sql-fields[]
 
   public static final String TITLE_KEY = "title";
-  // end::sql-fields[]
+  private static final String EMPTY_PAGE_MARKDOWN =
+          "# A new page\n" +
+                  "\n" +
+                  "Feel-free to write in Markdown!\n";
 
   // tag::db-and-logger[]
   private JDBCClient dbClient;
-
   private static final Logger LOGGER = LoggerFactory.getLogger(MainVerticle.class);
   // end::db-and-logger[]
 
   private static final String LOCATION_HEADER = "Location";
+  private final FreeMarkerTemplateEngine templateEngine = FreeMarkerTemplateEngine.create();
 
   // tag::prepareDatabase[]
   private Future<Void> prepareDatabase() {
@@ -159,8 +162,6 @@ public class MainVerticle extends AbstractVerticle {
   // end::pageCreateHandler[]
 
   // tag::indexHandler[]
-  private final FreeMarkerTemplateEngine templateEngine = FreeMarkerTemplateEngine.create();
-
   private void indexHandler(RoutingContext context) {
     dbClient.getConnection(car -> {
       if (car.succeeded()) {
@@ -232,12 +233,7 @@ public class MainVerticle extends AbstractVerticle {
   }
   // end::pageUpdateHandler[]
 
-  // tag::pageRenderingHandler[]
-  private static final String EMPTY_PAGE_MARKDOWN =
-    "# A new page\n" +
-      "\n" +
-      "Feel-free to write in Markdown!\n";
-
+  // tag::pagesSearchHandler[]
   private void pagesSearchHandler(RoutingContext context) {
 
     String searchText = context.request().getParam("searchText");
@@ -267,19 +263,18 @@ public class MainVerticle extends AbstractVerticle {
                 context.fail(ar.cause());
               }
             });
-
-
           } else {
             context.fail(fetch.cause());
           }
-
         });
       } else {
         context.fail(car.cause());
       }
     });
   }
+  // end::pagesSearchHandler[]
 
+  // tag::pageRenderingHandler[]
   private void pageRenderingHandler(RoutingContext context) {
     String page = context.request().getParam("page");   // <1>
 
