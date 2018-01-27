@@ -110,9 +110,9 @@ public class MainVerticle extends AbstractVerticle {
 
     server
       .requestHandler(router::accept)   // <5>
-      .listen(8080, ar -> {   // <6>
+      .listen(9292, ar -> {   // <6>
         if (ar.succeeded()) {
-          LOGGER.info("HTTP server running on port 8080");
+          LOGGER.info("HTTP server running on port 9292");
           future.complete();
         } else {
           LOGGER.error("Could not start a HTTP server", ar.cause());
@@ -372,13 +372,18 @@ public class MainVerticle extends AbstractVerticle {
     if (source == null || source.isEmpty() || part == null || part.isEmpty()) {
       return Optional.empty();
     }
+
     int position = source.indexOf(part);
+    if (position < 0) {
+      return Optional.empty();
+    }
+
     if (position - upFrontLength >= 0) {
-      return Optional.of(source.substring(position-upFrontLength, position-upFrontLength+extractionLenght));
+      return Optional.of(source.substring(position-upFrontLength, position-upFrontLength+extractionLenght) + "...");
     } else if (position + extractionLenght < source.length()) {
       return Optional.of(source.substring(position, position + extractionLenght));
     } else {
-      return Optional.empty();
+      return Optional.of(source.substring(position));
     }
   }
 }
