@@ -255,6 +255,8 @@ public class MainVerticle extends AbstractVerticle {
 
             context.put(TITLE_KEY, "Search results....");
             context.put("pageContentParts", pageContentParts);
+            context.put("searchText", searchText);
+
             templateEngine.render(context, "templates", "/search.ftl", ar -> {
               if (ar.succeeded()) {
                 context.response().putHeader("Content-Type", "text/html");
