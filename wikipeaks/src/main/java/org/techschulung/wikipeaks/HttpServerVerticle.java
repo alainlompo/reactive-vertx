@@ -151,7 +151,7 @@ public class HttpServerVerticle extends AbstractVerticle {
 
         vertx.eventBus().send(wikiDbQueue, new JsonObject(), options, reply -> {
             if (reply.succeeded()) {
-                
+
                 JsonObject body = (JsonObject) reply.result().body();
                 JsonArray pageContentPartsContainer = body.getJsonArray("pageContentParts");
 
