@@ -4,6 +4,12 @@ import io.vertx.core.AbstractVerticle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Properties;
+
 /**
  * Created by alompo on 30.01.18.
  */
@@ -16,5 +22,41 @@ public class WikiDatabaseVerticle extends AbstractVerticle {
     public static final String CONFIG_WIKIDB_QUEUE = "wikidb.queue";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WikiDatabaseVerticle.class);
+
+    private enum SqlQuery {
+        CREATE_PAGES_TABLE,
+        ALL_PAGES,
+        GET_PAGE,
+        CREATE_PAGE,
+        SAVE_PAGE,
+        DELETE_PAGE,
+        SEARCH_ALL_PAGES
+    }
+
+    private final HashMap<SqlQuery, String> sqlQueries = new HashMap<>();
+
+    // TODO: Look for a better way to do this
+    private void loadSqlQueries() throws IOException {
+
+        String queriesFile = config().getString(CONFIG_WIKIDB_SQL_QUERIES_RESOURCE_FILE);
+        InputStream queriesInputStream;
+        if (queriesFile != null) {
+            queriesInputStream = new FileInputStream(queriesFile);
+        } else {
+            queriesInputStream = getClass().getResourceAsStream("/db-queries.properties");
+        }
+
+        Properties queriesProps = new Properties();
+        queriesProps.load(queriesInputStream);
+        queriesInputStream.close();
+
+        sqlQueries.put(SqlQuery.CREATE_PAGES_TABLE, queriesProps.getProperty("create-pages-table"));
+        sqlQueries.put(SqlQuery.ALL_PAGES, queriesProps.getProperty("all-pages"));
+        sqlQueries.put(SqlQuery.GET_PAGE, queriesProps.getProperty("get-page"));
+        sqlQueries.put(SqlQuery.CREATE_PAGE, queriesProps.getProperty("create-page"));
+        sqlQueries.put(SqlQuery.SAVE_PAGE, queriesProps.getProperty("save-page"));
+        sqlQueries.put(SqlQuery.DELETE_PAGE, queriesProps.getProperty("delete-page"));
+        sqlQueries.put(SqlQuery.SEARCH_ALL_PAGES, queriesProps.getProperty("search-all-pages"));
+    }
 
 }
