@@ -59,7 +59,7 @@ public class HttpServerVerticle extends AbstractVerticle {
         router.post("/delete").handler(this::pageDeletionHandler);
         router.post("/search").handler(this::pagesSearchHandler);
 
-        int portNumber = config().getInteger(CONFIG_HTTP_SERVER_PORT, 8080);
+        int portNumber = config().getInteger(CONFIG_HTTP_SERVER_PORT, 9292);
         server
                 .requestHandler(router::accept)
                 .listen(portNumber, ar -> {
