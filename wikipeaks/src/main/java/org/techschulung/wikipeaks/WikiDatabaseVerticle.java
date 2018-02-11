@@ -146,8 +146,8 @@ public class WikiDatabaseVerticle extends AbstractVerticle {
         sqlQueries.put(SqlQuery.SEARCH_ALL_PAGES, queriesProps.getProperty("search-all-pages"));
     }
 
-    private PageContentPart mapPageContentPart(JsonArray jsonArray) {
-        return new PageContentPart(jsonArray.getString(0), jsonArray.getString(1));
+    private String mapPageContentPart(JsonArray jsonArray) {
+        return new PageContentPart(jsonArray.getString(1), jsonArray.getString(2)).toJsonString();
     }
 
     private void searchAllPages(Message<JsonObject> message) {
@@ -158,13 +158,15 @@ public class WikiDatabaseVerticle extends AbstractVerticle {
         dbClient.queryWithParams(sqlQueries.get(SqlQuery.SEARCH_ALL_PAGES), params, res -> {
             if (res.succeeded()) {
 
-                LOGGER.debug("The direct query result is: " +  res.result().getResults().toString());
-                List<PageContentPart> pageContentParts
+                List<String> pageContentParts
                         = res.result()
                         .getResults()
                         .stream()
                         .map(this::mapPageContentPart)
                         .collect(Collectors.toList());
+                
+                // Too bad: the number of objects type we can use here is very limited
+                // See: https://github.com/eclipse/vert.x/blob/master/src/main/java/io/vertx/core/json/Json.java
                 message.reply(new JsonObject().put("pageContentParts", new JsonArray(pageContentParts)));
             } else {
                 reportQueryError(message, res.cause());
@@ -259,6 +261,4 @@ public class WikiDatabaseVerticle extends AbstractVerticle {
         LOGGER.error("Database query error", cause);
         message.fail(ErrorCodes.DB_ERROR.ordinal(), cause.getMessage());
     }
-
-
 }
