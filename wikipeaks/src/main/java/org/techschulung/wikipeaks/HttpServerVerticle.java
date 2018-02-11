@@ -37,7 +37,6 @@ public class HttpServerVerticle extends AbstractVerticle {
 
     private final FreeMarkerTemplateEngine templateEngine = FreeMarkerTemplateEngine.create();
 
-
     private String wikiDbQueue = "wikidb.queue";
 
     public static final String TITLE_KEY = "title";
@@ -100,8 +99,8 @@ public class HttpServerVerticle extends AbstractVerticle {
         return new PageContentPart(jsonArray.getString(1), jsonArray.getString(2));
     }
 
-    private PageContentPart mapContentPartWrapper(Object jsonArray) {
-        return mapContentPart((JsonArray)jsonArray);
+    private PageContentPart mapContentPartWrapper(String jsonArray) {
+        return PageContentPart.parseJson(jsonArray);
     }
 
     private PageContentPart reduced(PageContentPart pageContentPart, String searchCriteria)  {
@@ -148,20 +147,17 @@ public class HttpServerVerticle extends AbstractVerticle {
 
         String searchText = context.request().getParam("searchText");
         DeliveryOptions options = new DeliveryOptions().addHeader("action", "search-all-pages");
-        JsonObject request = new JsonObject().put("searchText", "'%" + searchText + "%'");
+        JsonObject request = new JsonObject().put("searchText", "%" + searchText + "%");
 
         vertx.eventBus().send(wikiDbQueue, request, options, reply -> {
             if (reply.succeeded()) {
 
                 JsonObject body = (JsonObject) reply.result().body();
-                LOGGER.debug("The whole DbVerticle body is: " + body);
 
                 JsonArray pageContentPartsContainer = body.getJsonArray("pageContentParts");
 
-                LOGGER.debug("Response from DBVerticle: " + pageContentPartsContainer.toString());
-
                 // TODO: all this part needs more refactoring
-                final Function<Object, PageContentPart> objectToContentPartTransformer = this::mapContentPartWrapper;
+                final Function<String, PageContentPart> objectToContentPartTransformer = this::mapContentPartWrapper;
                 final Function<PageContentPart, PageContentPart> contentPartReducer = contentPart -> reduced(contentPart, searchText);
 
                 List<PageContentPart>  pageContentParts
@@ -277,5 +273,4 @@ public class HttpServerVerticle extends AbstractVerticle {
             }
         });
     }
-
 }
