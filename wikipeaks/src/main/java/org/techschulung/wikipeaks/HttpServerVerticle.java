@@ -148,12 +148,17 @@ public class HttpServerVerticle extends AbstractVerticle {
 
         String searchText = context.request().getParam("searchText");
         DeliveryOptions options = new DeliveryOptions().addHeader("action", "search-all-pages");
+        JsonObject request = new JsonObject().put("searchText", "'%" + searchText + "%'");
 
-        vertx.eventBus().send(wikiDbQueue, new JsonObject(), options, reply -> {
+        vertx.eventBus().send(wikiDbQueue, request, options, reply -> {
             if (reply.succeeded()) {
 
                 JsonObject body = (JsonObject) reply.result().body();
+                LOGGER.debug("The whole DbVerticle body is: " + body);
+
                 JsonArray pageContentPartsContainer = body.getJsonArray("pageContentParts");
+
+                LOGGER.debug("Response from DBVerticle: " + pageContentPartsContainer.toString());
 
                 // TODO: all this part needs more refactoring
                 final Function<Object, PageContentPart> objectToContentPartTransformer = this::mapContentPartWrapper;
