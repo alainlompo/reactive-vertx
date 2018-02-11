@@ -102,6 +102,9 @@ public class WikiDatabaseVerticle extends AbstractVerticle {
             case "delete-page":
                 deletePage(message);
                 break;
+            case "search-all-pages":
+                searchAllPages(message);
+                break;
             default:
                 message.fail(ErrorCodes.BAD_ACTION.ordinal(), "Bad action: " + action);
         }
@@ -142,6 +145,34 @@ public class WikiDatabaseVerticle extends AbstractVerticle {
         sqlQueries.put(SqlQuery.DELETE_PAGE, queriesProps.getProperty("delete-page"));
         sqlQueries.put(SqlQuery.SEARCH_ALL_PAGES, queriesProps.getProperty("search-all-pages"));
     }
+
+    private PageContentPart mapPageContentPart(JsonArray jsonArray) {
+        return new PageContentPart(jsonArray.getString(0), jsonArray.getString(1));
+    }
+
+    private void searchAllPages(Message<JsonObject> message) {
+
+        String searchText = message.body().getString("searchText");
+        JsonArray params = new JsonArray().add(searchText);
+
+        dbClient.queryWithParams(sqlQueries.get(SqlQuery.SEARCH_ALL_PAGES), params, res -> {
+            if (res.succeeded()) {
+
+                LOGGER.debug("The direct query result is: " +  res.result().getResults().toString());
+                List<PageContentPart> pageContentParts
+                        = res.result()
+                        .getResults()
+                        .stream()
+                        .map(this::mapPageContentPart)
+                        .collect(Collectors.toList());
+                message.reply(new JsonObject().put("pageContentParts", new JsonArray(pageContentParts)));
+            } else {
+                reportQueryError(message, res.cause());
+            }
+        });
+    }
+
+
 
     private void fetchAllPages(Message<JsonObject> message) {
         dbClient.query(sqlQueries.get(SqlQuery.ALL_PAGES), res -> {
