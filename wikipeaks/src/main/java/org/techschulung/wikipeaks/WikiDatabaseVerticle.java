@@ -164,7 +164,7 @@ public class WikiDatabaseVerticle extends AbstractVerticle {
                         .stream()
                         .map(this::mapPageContentPart)
                         .collect(Collectors.toList());
-                
+
                 // Too bad: the number of objects type we can use here is very limited
                 // See: https://github.com/eclipse/vert.x/blob/master/src/main/java/io/vertx/core/json/Json.java
                 message.reply(new JsonObject().put("pageContentParts", new JsonArray(pageContentParts)));
