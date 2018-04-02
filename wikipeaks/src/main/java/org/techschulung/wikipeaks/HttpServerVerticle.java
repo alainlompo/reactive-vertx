@@ -95,10 +95,6 @@ public class HttpServerVerticle extends AbstractVerticle {
         });
     }
 
-    private PageContentPart mapContentPart(JsonArray jsonArray) {
-        return new PageContentPart(jsonArray.getString(1), jsonArray.getString(2));
-    }
-
     private PageContentPart mapContentPartWrapper(String jsonArray) {
         return PageContentPart.parseJson(jsonArray);
     }
