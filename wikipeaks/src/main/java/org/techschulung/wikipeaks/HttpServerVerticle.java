@@ -14,6 +14,7 @@ import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.templ.FreeMarkerTemplateEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.techschulung.wikipeaks.database.WikiDatabaseService;
 
 import java.util.Date;
 import java.util.List;
@@ -38,6 +39,7 @@ public class HttpServerVerticle extends AbstractVerticle {
     private final FreeMarkerTemplateEngine templateEngine = FreeMarkerTemplateEngine.create();
 
     private String wikiDbQueue = "wikidb.queue";
+    private WikiDatabaseService dbService;
 
     public static final String TITLE_KEY = "title";
 
@@ -46,6 +48,7 @@ public class HttpServerVerticle extends AbstractVerticle {
     public void start(Future<Void> startFuture) throws Exception {
 
         wikiDbQueue = config().getString(CONFIG_WIKIDB_QUEUE, "wikidb.queue");
+        dbService = WikiDatabaseService.createProxy(vertx, wikiDbQueue);
 
         HttpServer server = vertx.createHttpServer();
 

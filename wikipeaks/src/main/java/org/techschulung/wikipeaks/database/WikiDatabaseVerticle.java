@@ -4,7 +4,6 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.jdbc.JDBCClient;
-import sun.plugin2.message.helper.ProxyHelper;
 
 import java.io.FileInputStream;
 import java.io.IOException;
