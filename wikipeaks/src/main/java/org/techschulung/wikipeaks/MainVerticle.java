@@ -20,6 +20,7 @@ package org.techschulung.wikipeaks;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
+import org.techschulung.wikipeaks.database.WikiDatabaseVerticle;
 
 public class MainVerticle extends AbstractVerticle {
 
