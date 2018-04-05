@@ -20,13 +20,14 @@ package org.techschulung.wikipeaks;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
+import org.techschulung.wikipeaks.database.WikiDatabaseVerticle;
 
 public class MainVerticle extends AbstractVerticle {
 
   @Override
   public void start(Future<Void> startFuture) throws Exception {
 
-    /*Future<String> dbVerticleDeployment = Future.future();
+    Future<String> dbVerticleDeployment = Future.future();
     vertx.deployVerticle(new WikiDatabaseVerticle(), dbVerticleDeployment.completer());
 
     dbVerticleDeployment.compose(id -> {
@@ -45,6 +46,6 @@ public class MainVerticle extends AbstractVerticle {
       } else {
         startFuture.fail(ar.cause());
       }
-    });*/
+    });
   }
 }

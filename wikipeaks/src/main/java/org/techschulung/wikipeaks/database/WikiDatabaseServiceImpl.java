@@ -104,7 +104,7 @@ public class WikiDatabaseServiceImpl implements WikiDatabaseService {
     }
 
     @Override
-    public WikiDatabaseService savePage(String id, String markdown, Handler<AsyncResult<Void>> resultHandler) {
+    public WikiDatabaseService savePage(int id, String markdown, Handler<AsyncResult<Void>> resultHandler) {
         JsonArray data = new JsonArray().add(markdown).add(id);
         dbClient.updateWithParams(sqlQueries.get(SqlQuery.SAVE_PAGE), data,res -> {
            if (res.succeeded()) {

@@ -37,6 +37,7 @@ import org.techschulung.wikipeaks.database.WikiDatabaseService;
 import io.vertx.ext.jdbc.JDBCClient;
 import java.util.Map;
 import org.techschulung.wikipeaks.database.SqlQuery;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -124,7 +125,7 @@ public class WikiDatabaseServiceVertxEBProxy implements WikiDatabaseService {
     return this;
   }
 
-  public WikiDatabaseService savePage(String id, String markdown, Handler<AsyncResult<Void>> resultHandler) {
+  public WikiDatabaseService savePage(int id, String markdown, Handler<AsyncResult<Void>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return this;

@@ -44,6 +44,7 @@ import org.techschulung.wikipeaks.database.WikiDatabaseService;
 import io.vertx.ext.jdbc.JDBCClient;
 import java.util.Map;
 import org.techschulung.wikipeaks.database.SqlQuery;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -132,13 +133,14 @@ public class WikiDatabaseServiceVertxProxyHandler extends ProxyHandler {
           break;
         }
         case "savePage": {
-          service.savePage((java.lang.String)json.getValue("id"), (java.lang.String)json.getValue("markdown"), createHandler(msg));
+          service.savePage(json.getValue("id") == null ? null : (json.getLong("id").intValue()), (java.lang.String)json.getValue("markdown"), createHandler(msg));
           break;
         }
         case "deletePage": {
           service.deletePage(json.getValue("id") == null ? null : (json.getLong("id").intValue()), createHandler(msg));
           break;
         }
+
 
         default: {
           throw new IllegalStateException("Invalid action: " + action);

@@ -135,7 +135,7 @@
             <annotationProcessors>
               <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
             </annotationProcessors>
-            <generatedSourcesDirectory>${project.basedir}/src/main/generated</generatedSourcesDirectory>
+            <generatedSourcesDirectory>${project.basedir}/src/main/java/generated</generatedSourcesDirectory>
             <compilerArgs>
               <arg>-AoutputDirectory=${project.basedir}/src/main</arg>
             </compilerArgs>
@@ -157,7 +157,7 @@
           <configuration>
             <filesets>
               <fileset>
-                <directory>${project.basedir}/src/main/generated</directory>
+                <directory>${project.basedir}/src/main/java/generated</directory>
               </fileset>
             </filesets>
           </configuration>

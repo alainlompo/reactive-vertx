@@ -28,12 +28,16 @@ public interface WikiDatabaseService {
     WikiDatabaseService createPage(String title, String markdown, Handler<AsyncResult<Void>> resultHandler);
 
     @Fluent
-    WikiDatabaseService savePage(String id, String markdown, Handler<AsyncResult<Void>> resultHandler);
+    WikiDatabaseService savePage(int id, String markdown, Handler<AsyncResult<Void>> resultHandler);
 
     @Fluent
     WikiDatabaseService deletePage(int id, Handler<AsyncResult<Void>> resultHandler);
 
     static WikiDatabaseService create(JDBCClient dbClient, Map<SqlQuery, String> sqlQueries, Handler<AsyncResult<WikiDatabaseService>> readyHandler ) {
         return new WikiDatabaseServiceImpl(dbClient, sqlQueries,readyHandler);
+    }
+
+    static WikiDatabaseService createProxy(Vertx vertx, String address) {
+        return new org.techschulung.wikipeaks.database.WikiDatabaseServiceVertxEBProxy(vertx, address);
     }
 }
