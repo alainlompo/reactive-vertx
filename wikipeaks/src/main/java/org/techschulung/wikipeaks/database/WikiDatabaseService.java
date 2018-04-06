@@ -37,6 +37,9 @@ public interface WikiDatabaseService {
     @Fluent
     WikiDatabaseService fetchAllPagesData(Handler<AsyncResult<List<JsonObject>>> resultHandler);
 
+    @Fluent
+    WikiDatabaseService fetchPageById(Integer id, Handler<AsyncResult<JsonObject>> resultHandler);
+
     static WikiDatabaseService create(JDBCClient dbClient, Map<SqlQuery, String> sqlQueries, Handler<AsyncResult<WikiDatabaseService>> readyHandler ) {
         return new WikiDatabaseServiceImpl(dbClient, sqlQueries,readyHandler);
     }

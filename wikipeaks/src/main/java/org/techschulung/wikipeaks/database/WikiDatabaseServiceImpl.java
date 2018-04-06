@@ -70,22 +70,46 @@ public class WikiDatabaseServiceImpl implements WikiDatabaseService {
     @Override
     public WikiDatabaseService fetchPage(String name, Handler<AsyncResult<JsonObject>> resultHandler) {
         dbClient.queryWithParams(sqlQueries.get(SqlQuery.GET_PAGE), new JsonArray().add(name), fetch -> {
-           if (fetch.succeeded()) {
-               JsonObject response = new JsonObject();
-               ResultSet resultSet = fetch.result();
-               if (resultSet.getNumRows() == 0) {
-                   response.put("found", false);
-               } else {
-                   response.put("found", true);
-                   JsonArray row = resultSet.getResults().get(0);
-                   response.put("id", row.getInteger(0));
-                   response.put("rawContent", row.getString(1));
-               }
-               resultHandler.handle(Future.succeededFuture(response));
-           } else {
-               LOGGER.error("Database query error", fetch.cause());
-               resultHandler.handle(Future.failedFuture(fetch.cause()));
-           }
+            if (fetch.succeeded()) {
+                JsonObject response = new JsonObject();
+                ResultSet resultSet = fetch.result();
+                if (resultSet.getNumRows() == 0) {
+                    response.put("found", false);
+                } else {
+                    response.put("found", true);
+                    JsonArray row = resultSet.getResults().get(0);
+                    response.put("id", row.getInteger(0));
+                    response.put("rawContent", row.getString(1));
+                }
+                resultHandler.handle(Future.succeededFuture(response));
+            } else {
+                LOGGER.error("Database query error", fetch.cause());
+                resultHandler.handle(Future.failedFuture(fetch.cause()));
+            }
+        });
+        return this;
+    }
+
+    @Override
+    public WikiDatabaseService fetchPageById(Integer id, Handler<AsyncResult<JsonObject>> resultHandler) {
+        dbClient.queryWithParams(sqlQueries.get(SqlQuery.GET_PAGE_BY_ID), new JsonArray().add(id), fetch -> {
+            if (fetch.succeeded()) {
+                JsonObject response = new JsonObject();
+                ResultSet resultSet = fetch.result();
+                if (resultSet.getNumRows() == 0) {
+                    response.put("found", false);
+                } else {
+                    response.put("found", true);
+                    JsonArray row = resultSet.getResults().get(0);
+                    response.put("id", row.getInteger(0));
+                    response.put("name", row.getString(1));
+                    response.put("rawContent", row.getString(2));
+                }
+                resultHandler.handle(Future.succeededFuture(response));
+            } else {
+                LOGGER.error("Database query error", fetch.cause());
+                resultHandler.handle(Future.failedFuture(fetch.cause()));
+            }
         });
         return this;
     }
