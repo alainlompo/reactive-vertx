@@ -41,7 +41,7 @@ public class ApiTest {
 
         webClient = WebClient.create(vertx, new WebClientOptions()
                 .setDefaultHost("localhost")
-                .setDefaultPort(9295)
+                .setDefaultPort(9292)
         );
     }
 
