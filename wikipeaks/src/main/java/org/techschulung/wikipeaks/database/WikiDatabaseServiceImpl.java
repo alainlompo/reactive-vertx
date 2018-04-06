@@ -11,6 +11,7 @@ import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.SQLConnection;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -127,6 +128,19 @@ public class WikiDatabaseServiceImpl implements WikiDatabaseService {
                LOGGER.error("Database query error", res.cause());
                resultHandler.handle(Future.failedFuture(res.cause()));
            }
+        });
+        return this;
+    }
+
+    @Override
+    public WikiDatabaseService fetchAllPagesData(Handler<AsyncResult<List<JsonObject>>> resultHandler) {
+        dbClient.query(sqlQueries.get(SqlQuery.ALL_PAGES_DATA), queryResult -> {
+            if (queryResult.succeeded()) {
+                resultHandler.handle(Future.succeededFuture(queryResult.result().getRows()));
+            } else {
+                LOGGER.error("Database query error", queryResult.cause());
+                resultHandler.handle(Future.failedFuture(queryResult.cause()));
+            }
         });
         return this;
     }

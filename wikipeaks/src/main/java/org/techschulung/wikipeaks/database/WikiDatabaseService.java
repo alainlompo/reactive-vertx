@@ -9,6 +9,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.jdbc.JDBCClient;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,6 +32,10 @@ public interface WikiDatabaseService {
 
     @Fluent
     WikiDatabaseService deletePage(int id, Handler<AsyncResult<Void>> resultHandler);
+
+    // TODO: Fix the exception that prevents generation in relation to this addition
+    @Fluent
+    WikiDatabaseService fetchAllPagesData(Handler<AsyncResult<List<JsonObject>>> resultHandler);
 
     static WikiDatabaseService create(JDBCClient dbClient, Map<SqlQuery, String> sqlQueries, Handler<AsyncResult<WikiDatabaseService>> readyHandler ) {
         return new WikiDatabaseServiceImpl(dbClient, sqlQueries,readyHandler);

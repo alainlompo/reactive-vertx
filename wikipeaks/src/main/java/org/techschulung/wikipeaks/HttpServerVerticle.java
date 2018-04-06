@@ -12,6 +12,10 @@ import io.vertx.core.json.JsonObject;
 
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.client.HttpResponse;
+import io.vertx.ext.web.client.WebClient;
+import io.vertx.ext.web.client.WebClientOptions;
+import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.templ.FreeMarkerTemplateEngine;
 import org.slf4j.Logger;
@@ -32,6 +36,7 @@ public class HttpServerVerticle extends AbstractVerticle {
 
     public static final String CONFIG_HTTP_SERVER_PORT = "http.server.port";
     public static final String CONFIG_WIKIDB_QUEUE = "wikidb.queue";
+    public static final String TITLE_KEY = "title";
 
     private static final String EMPTY_PAGE_MARKDOWN =
             "# A new page\n" +
@@ -42,8 +47,7 @@ public class HttpServerVerticle extends AbstractVerticle {
 
     private String wikiDbQueue = "wikidb.queue";
     private WikiDatabaseService dbService;
-
-    public static final String TITLE_KEY = "title";
+    private WebClient webClient;
 
 
     @Override
@@ -54,6 +58,10 @@ public class HttpServerVerticle extends AbstractVerticle {
 
         HttpServer server = vertx.createHttpServer();
 
+        webClient = WebClient.create(vertx, new WebClientOptions()
+                .setSsl(true)
+                .setUserAgent("vert-x3"));
+
         Router router = Router.router(vertx);
         router.get("/").handler(this::indexHandler);
         router.get("/wiki/:page").handler(this::pageRenderingHandler);
@@ -62,6 +70,7 @@ public class HttpServerVerticle extends AbstractVerticle {
         router.post("/create").handler(this::pageCreateHandler);
         router.post("/delete").handler(this::pageDeletionHandler);
         router.post("/search").handler(this::pagesSearchHandler);
+        router.get("/backup").handler(this::backupHandler);
 
         int portNumber = config().getInteger(CONFIG_HTTP_SERVER_PORT, 9292);
         server
@@ -75,6 +84,59 @@ public class HttpServerVerticle extends AbstractVerticle {
                         startFuture.fail(ar.cause());
                     }
                 });
+    }
+
+    // TODO: The create a gist endpoint requires now authentication
+    // See here: https://developer.github.com/v3/gists/#create-a-gist
+    private void backupHandler(RoutingContext context) {
+        dbService.fetchAllPagesData(reply -> {
+           if (reply.succeeded()) {
+               JsonObject filesObject = new JsonObject();
+               JsonObject gistPayload = new JsonObject()
+                       .put("files", filesObject)
+                       .put("description", "A wiki backup")
+                       .put("public", true);
+
+               reply
+                       .result()
+                       .forEach(page -> {
+                           JsonObject fileObject = new JsonObject();
+                           filesObject.put(page.getString("NAME"), fileObject);
+                           fileObject.put("content", page.getString("CONTENT"));
+                       });
+
+               webClient.post(443, "api.github.com", "/gists")
+                       .putHeader("Accept", "application/vnd.github.v3+json")
+                       .putHeader("Content-Type", "application/json")
+                       .as(BodyCodec.jsonObject())
+                       .sendJsonObject(gistPayload, ar -> {
+                           if (ar.succeeded()) {
+                               HttpResponse<JsonObject> response = ar.result();
+                               if (response.statusCode() == 201) {
+                                   context.put("backup_gist_url", response.body().getString("html_url"));
+                                   indexHandler(context);
+                               } else {
+                                   StringBuilder message = new StringBuilder()
+                                           .append("Could not backup the wiki: ")
+                                           .append(response.statusMessage());
+                                   JsonObject body = response.body();
+                                   if (body != null) {
+                                       message.append(System.getProperty("line.separator"))
+                                               .append(body.encodePrettily());
+                                   }
+                                   LOGGER.error(message.toString());
+                                   context.fail(502);
+                               }
+                           } else {
+                               Throwable err = ar.cause();
+                               LOGGER.error("HTTP Client error", err);
+                               context.fail(err);
+                           }
+                       });
+           } else {
+                   context.fail(reply.cause());
+           }
+        });
     }
 
     private void indexHandler(RoutingContext context) {
