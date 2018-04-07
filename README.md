@@ -10,3 +10,12 @@ The next branch does that
 
 This branch is derived from feature/refactoring-services. Here we refactor the code to create Db service and proxy and
 to effectively use them
+
+
+#### Branch feature/security
+
+Here we start by creating and adding a self signed certificate in our java keystore using keytool:
+
+```
+keytool -genkey -alias test -keyalg RSA -keystore server-keystore.jks -keysize 2048 -validity 360 -dname CN=localhost -keypass secret -storepass secret.
+```
