@@ -14,7 +14,7 @@ to effectively use them
 
 #### Branch feature/security
 
-Here we start by creating and adding a self signed certificate in our java keystore using keytool:
+Here we start by creating and adding a self signed certificate in our java keystore using the keytool command line tool:
 
 ```
 keytool -genkey -alias test -keyalg RSA -keystore server-keystore.jks -keysize 2048 -validity 360 -dname CN=localhost -keypass secret -storepass secret.
