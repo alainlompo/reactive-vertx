@@ -130,6 +130,18 @@
       <scope>provided</scope>
     </dependency>
 
+    <!-- vertx authentication via apache shiro -->
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-auth-shiro</artifactId>
+    </dependency>
+
+    <!-- vertx authentication with jwt -->
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-auth-jwt</artifactId>
+    </dependency>
+
 
   </dependencies>
 
