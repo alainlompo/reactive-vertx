@@ -18,39 +18,33 @@
 package io.vertx.guides.wiki.http;
 
 import com.github.rjeschke.txtmark.Processor;
-import io.vertx.core.AbstractVerticle;
+import io.reactivex.Single;
+import io.vertx.reactivex.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.http.HttpServer;
+import io.vertx.reactivex.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.net.JksOptions;
-import io.vertx.ext.auth.AuthProvider;
-import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.jwt.JWTAuth;
+import io.vertx.reactivex.ext.auth.AuthProvider;
+import io.vertx.reactivex.ext.auth.User;
+import io.vertx.reactivex.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTOptions;
-import io.vertx.ext.auth.shiro.ShiroAuth;
+import io.vertx.reactivex.ext.auth.shiro.ShiroAuth;
 import io.vertx.ext.auth.shiro.ShiroAuthOptions;
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
-import io.vertx.ext.web.Router;
-import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.client.HttpResponse;
-import io.vertx.ext.web.client.WebClient;
+import io.vertx.reactivex.ext.web.Router;
+import io.vertx.reactivex.ext.web.RoutingContext;
+import io.vertx.reactivex.ext.web.client.HttpResponse;
+import io.vertx.reactivex.ext.web.client.WebClient;
 import io.vertx.ext.web.client.WebClientOptions;
-import io.vertx.ext.web.codec.BodyCodec;
-import io.vertx.ext.web.handler.AuthHandler;
-import io.vertx.ext.web.handler.BodyHandler;
-import io.vertx.ext.web.handler.CookieHandler;
-import io.vertx.ext.web.handler.FormLoginHandler;
-import io.vertx.ext.web.handler.JWTAuthHandler;
-import io.vertx.ext.web.handler.RedirectAuthHandler;
-import io.vertx.ext.web.handler.SessionHandler;
-import io.vertx.ext.web.handler.UserSessionHandler;
-import io.vertx.ext.web.sstore.LocalSessionStore;
-import io.vertx.ext.web.templ.FreeMarkerTemplateEngine;
+import io.vertx.reactivex.ext.web.codec.BodyCodec;
+import io.vertx.reactivex.ext.web.handler.*;
+import io.vertx.reactivex.ext.web.sstore.LocalSessionStore;
+import io.vertx.reactivex.ext.web.templ.FreeMarkerTemplateEngine;
 import io.vertx.guides.wiki.database.WikiDatabaseService;
 
 import java.util.Arrays;
@@ -83,7 +77,7 @@ public class HttpServerVerticle extends AbstractVerticle {
   public void start(Future<Void> startFuture) throws Exception {
 
     String wikiDbQueue = config().getString(CONFIG_WIKIDB_QUEUE, "wikidb.queue");
-    dbService = WikiDatabaseService.createProxy(vertx, wikiDbQueue);
+    dbService = WikiDatabaseService.createProxy(vertx.getDelegate(), wikiDbQueue);
 
     webClient = WebClient.create(vertx, new WebClientOptions()
       .setSsl(true)
@@ -156,31 +150,26 @@ public class HttpServerVerticle extends AbstractVerticle {
       JsonObject creds = new JsonObject()
         .put("username", context.request().getHeader("login"))
         .put("password", context.request().getHeader("password"));
-      auth.authenticate(creds, authResult -> {  // <1>
 
-        if (authResult.succeeded()) {
-          User user = authResult.result();
-          user.isAuthorised("create", canCreate -> {  // <2>
-            user.isAuthorised("delete", canDelete -> {
-              user.isAuthorised("update", canUpdate -> {
+      auth.rxAuthenticate(creds).flatMap(user -> {
+        Single<Boolean> create = user.rxIsAuthorised("create");
+        Single<Boolean> delete = user.rxIsAuthorised("delete");
+        Single<Boolean> update = user.rxIsAuthorised("update");
 
-                String token = jwtAuth.generateToken( // <3>
-                  new JsonObject()
-                    .put("username", context.request().getHeader("login"))
-                    .put("canCreate", canCreate.succeeded() && canCreate.result())
-                    .put("canDelete", canDelete.succeeded() && canDelete.result())
-                    .put("canUpdate", canUpdate.succeeded() && canUpdate.result()),
+        return Single.zip(create, delete, update, (canCreate, canDelete, canUpdate) -> {
+          return jwtAuth.generateToken(
+                          new JsonObject()
+                                  .put("username", context.request().getHeader("login"))
+                                  .put("canCreate", canCreate)
+                                  .put("canDelete", canDelete)
+                                  .put("canUpdate", canUpdate),
                   new JWTOptions()
-                    .setSubject("Wiki API")
-                    .setIssuer("Vert.x"));
-                context.response().putHeader("Content-Type", "text/plain").end(token);
-              });
-            });
-          });
-        } else {
-          context.fail(401);
-        }
-      });
+                          .setSubject("Wiki API")
+                          .setIssuer("Vert.x"));
+        });
+      }).subscribe(token -> {
+        context.response().putHeader("Content-Type", "text/plain").end(token);
+      }, t -> context.fail(401));
     });
     // end::issue-jwt[]
 

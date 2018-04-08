@@ -59,7 +59,7 @@ public interface WikiDatabaseService {
   WikiDatabaseService savePage(int id, String markdown, Handler<AsyncResult<Void>> resultHandler);
 
   @Fluent
-  WikiDatabaseService deletePage(int id, Handler<AsyncResult<Void>> resultHandler);
+  WikiDatabaseService rxDeletePage(int id, Handler<AsyncResult<Void>> resultHandler);
 
   @Fluent
   WikiDatabaseService fetchAllPagesData(Handler<AsyncResult<List<JsonObject>>> resultHandler);
