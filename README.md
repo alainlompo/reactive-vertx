@@ -1,4 +1,7 @@
-### The place to learn all about vert.x
+### Building asynchronous and reactive applications with Eclipse Vert.x
+
+In this repository, we are showcasing Eclipse Vert.x. The repo is organized as independent branches that are intentionally 
+left unmerged as each one of them demonstrate some specific aspects of Eclipse Vert.x
 
 #### Branch feature/refactoring-services
 
