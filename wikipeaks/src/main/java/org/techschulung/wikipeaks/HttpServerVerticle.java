@@ -159,8 +159,7 @@ public class HttpServerVerticle extends AbstractVerticle {
                 JsonArray pageContentPartsContainer = body.getJsonArray("pageContentParts");
 
                 LOGGER.debug("Response from DBVerticle: " + pageContentPartsContainer.toString());
-
-                // TODO: all this part needs more refactoring
+                
                 final Function<Object, PageContentPart> objectToContentPartTransformer = this::mapContentPartWrapper;
                 final Function<PageContentPart, PageContentPart> contentPartReducer = contentPart -> reduced(contentPart, searchText);
 
