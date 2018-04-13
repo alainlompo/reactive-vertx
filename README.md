@@ -12,7 +12,7 @@ This branch is derived from feature/refactoring-services. Here we refactor the c
 to effectively use them
 
 
-#### Branch feature/security
+#### Branch feature/security.
 
 Here we start by creating and adding a self signed certificate in our java keystore using the keytool command line tool:
 
