@@ -14,7 +14,7 @@ The resources folder contains the ppt presentation as well as the corresponding 
 #### Running the apps
 In each branch we have one or more mvn module. To run the corresponding app
 
-* Build the module, for example with ```mvn clean install`
+* Build the module, for example with ```mvn clean install```
 * launch the module with ```mvn java -jar target/{module-artifact-id-here}-fat.jar```
 * If everthing goes fine the terminal will display a start log indicating the running port also
 * Launch your favorite browser and go to ```http://localhost:{the-port}```
