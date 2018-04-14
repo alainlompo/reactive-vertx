@@ -18,3 +18,7 @@ In each branch we have one or more mvn module. To run the corresponding app
 * launch the module with ```mvn java -jar target/{module-artifact-id-here}-fat.jar```
 * If everthing goes fine the terminal will display a start log indicating the running port also
 * Launch your favorite browser and go to ```http://localhost:{the-port}```
+
+#### Sample angular based spa wiki
+
+<img src="https://github.com/alainlompo/reactive-vertx/blob/master/resources/app-showcasing.png?raw=true" />
