@@ -39,7 +39,6 @@ import java.util.stream.Collectors;
 
 public class MainVerticle extends AbstractVerticle {
 
-  // tag::sql-fields[]
   private static final String SQL_CREATE_PAGES_TABLE = "create table if not exists Pages (Id integer identity primary key, Name varchar(255) unique, Content clob)";
   private static final String SQL_GET_PAGE = "select Id, Content from Pages where Name = ?"; // <1>
   private static final String SQL_CREATE_PAGE = "insert into Pages values (NULL, ?, ?)";
@@ -47,7 +46,6 @@ public class MainVerticle extends AbstractVerticle {
   private static final String SQL_ALL_PAGES = "select Name from Pages";
   private static final String SQL_DELETE_PAGE = "delete from Pages where Id = ?";
   private static final String SQL_SEARCH_PAGES = "Select * from Pages where Content like ?";
-  // end::sql-fields[]
 
   public static final String TITLE_KEY = "title";
   private static final String EMPTY_PAGE_MARKDOWN =
@@ -55,15 +53,12 @@ public class MainVerticle extends AbstractVerticle {
                   "\n" +
                   "Feel-free to write in Markdown!\n";
 
-  // tag::db-and-logger[]
   private JDBCClient dbClient;
   private static final Logger LOGGER = LoggerFactory.getLogger(MainVerticle.class);
-  // end::db-and-logger[]
 
   private static final String LOCATION_HEADER = "Location";
   private final FreeMarkerTemplateEngine templateEngine = FreeMarkerTemplateEngine.create();
 
-  // tag::prepareDatabase[]
   private Future<Void> prepareDatabase() {
     Future<Void> future = Future.future();
 
@@ -92,9 +87,7 @@ public class MainVerticle extends AbstractVerticle {
 
     return future;
   }
-  // end::prepareDatabase[]
 
-  // tag::startHttpServer[]
   private Future<Void> startHttpServer() {
     Future<Void> future = Future.future();
     HttpServer server = vertx.createHttpServer();   // <1>
@@ -122,10 +115,7 @@ public class MainVerticle extends AbstractVerticle {
 
     return future;
   }
-  // end::startHttpServer[]
 
-
-  // tag::pageDeletionHandler[]
   private void pageDeletionHandler(RoutingContext context) {
     String id = context.request().getParam("id");
     dbClient.getConnection(car -> {
@@ -146,9 +136,7 @@ public class MainVerticle extends AbstractVerticle {
       }
     });
   }
-  // end::pageDeletionHandler[]
 
-  // tag::pageCreateHandler[]
   private void pageCreateHandler(RoutingContext context) {
     String pageName = context.request().getParam("name");
     String location = "/wiki/" + pageName;
@@ -159,9 +147,7 @@ public class MainVerticle extends AbstractVerticle {
     context.response().putHeader(LOCATION_HEADER, location);
     context.response().end();
   }
-  // end::pageCreateHandler[]
 
-  // tag::indexHandler[]
   private void indexHandler(RoutingContext context) {
     dbClient.getConnection(car -> {
       if (car.succeeded()) {
@@ -197,9 +183,7 @@ public class MainVerticle extends AbstractVerticle {
       }
     });
   }
-  // end::indexHandler[]
 
-  // tag::pageUpdateHandler[]
   private void pageUpdateHandler(RoutingContext context) {
     String id = context.request().getParam("id");   // <1>
     String title = context.request().getParam(TITLE_KEY);
@@ -231,9 +215,7 @@ public class MainVerticle extends AbstractVerticle {
       }
     });
   }
-  // end::pageUpdateHandler[]
 
-  // tag::pagesSearchHandler[]
   private void pagesSearchHandler(RoutingContext context) {
 
     String searchText = context.request().getParam("searchText");
@@ -274,9 +256,7 @@ public class MainVerticle extends AbstractVerticle {
       }
     });
   }
-  // end::pagesSearchHandler[]
 
-  // tag::pageRenderingHandler[]
   private void pageRenderingHandler(RoutingContext context) {
     String page = context.request().getParam("page");   // <1>
 
@@ -320,18 +300,15 @@ public class MainVerticle extends AbstractVerticle {
       }
     });
   }
-  // end::pageRenderingHandler[]
 
-  // tag::start[]
   @Override
   public void start(Future<Void> startFuture) throws Exception {
     Future<Void> steps = prepareDatabase().compose(v -> startHttpServer());
     steps.setHandler(startFuture.completer());
   }
-  // end::start[]
 
   public void anotherStart(Future<Void> startFuture) {
-    // tag::another-start[]
+
     Future<Void> steps = prepareDatabase().compose(v -> startHttpServer());
     steps.setHandler(ar -> {  // <1>
       if (ar.succeeded()) {
@@ -340,7 +317,7 @@ public class MainVerticle extends AbstractVerticle {
         startFuture.fail(ar.cause());
       }
     });
-    // end::another-start[]
+
   }
 
   private PageContentPart mapContentPart(JsonArray jsonArray) {

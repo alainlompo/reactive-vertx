@@ -15,7 +15,6 @@
   ~ limitations under the License.
   -->
 
-<!-- tag::conf[] -->
 <configuration>
 
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
@@ -34,4 +33,3 @@
   </root>
 
 </configuration>
-<!-- end::conf[] -->
