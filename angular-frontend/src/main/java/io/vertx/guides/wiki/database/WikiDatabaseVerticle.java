@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.Properties;
 
 /**
- * @author <a href="https://julien.ponge.org/">Julien Ponge</a>
+ * @author Alain Lompo
  */
 public class WikiDatabaseVerticle extends AbstractVerticle {
 

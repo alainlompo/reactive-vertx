@@ -16,7 +16,7 @@
  */
 
 /**
- * @author <a href="https://julien.ponge.org/">Julien Ponge</a>
+ * @author Alain Lompo
  */
 @ModuleGen(groupPackage = "io.vertx.guides.wiki.database", name = "wiki-database")
 package io.vertx.guides.wiki.database;

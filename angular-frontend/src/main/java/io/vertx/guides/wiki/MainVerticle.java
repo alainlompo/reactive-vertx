@@ -23,7 +23,7 @@ import io.vertx.rxjava.core.AbstractVerticle;
 import rx.Single;
 
 /**
- * @author <a href="https://julien.ponge.org/">Julien Ponge</a>
+ * @author Alain Lompo
  */
 public class MainVerticle extends AbstractVerticle {
 

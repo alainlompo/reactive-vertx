@@ -22,8 +22,8 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>io.vertx</groupId>
-  <artifactId>wiki-step-9</artifactId>
+  <groupId>reactive-vertx</groupId>
+  <artifactId>angular-frontend</artifactId>
   <version>1.1.0</version>
 
   <properties>
@@ -50,12 +50,12 @@
       <groupId>io.vertx</groupId>
       <artifactId>vertx-core</artifactId>
     </dependency>
-    <!-- tag::vertx-rx-java[] -->
+
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-rx-java</artifactId>
     </dependency>
-    <!-- end::vertx-rx-java[] -->
+
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-service-proxy</artifactId>

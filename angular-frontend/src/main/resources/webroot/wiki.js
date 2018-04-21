@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-// tag::module-decl[]
 'use strict';
 
 angular.module("wikiApp", [])
@@ -24,10 +23,6 @@ angular.module("wikiApp", [])
     var DEFAULT_PAGENAME = "Example page";
     var DEFAULT_MARKDOWN = "# Example page\n\nSome text _here_.\n";
 
-    // (...)
-// end::module-decl[]
-
-    // tag::new-reload-exists[]
     $scope.newPage = function() {
       $scope.pageId = undefined;
       $scope.pageName = DEFAULT_PAGENAME;
@@ -43,9 +38,7 @@ angular.module("wikiApp", [])
     $scope.pageExists = function() {
       return $scope.pageId !== undefined;
     };
-    // end::new-reload-exists[]
 
-    // tag::load[]
     $scope.load = function (id) {
       $http.get("/api/pages/" + id).then(function(response) {
         var page = response.data.page;
@@ -59,9 +52,7 @@ angular.module("wikiApp", [])
     $scope.updateRendering = function(html) {
       document.getElementById("rendering").innerHTML = html;
     };
-    // end::load[]
 
-    // tag::save-delete-notifications[]
     $scope.save = function() {
       var payload;
       if ($scope.pageId === undefined) {
@@ -120,26 +111,20 @@ angular.module("wikiApp", [])
         alert.classList.remove("alert-danger");
       }, 5000);
     };
-    // end::save-delete-notifications[]
 
-    // tag::init[]
     $scope.reload();
     $scope.newPage();
-    // end::init[]
 
-    // tag::live-rendering[]
     var markdownRenderingPromise = null;
-    $scope.$watch("pageMarkdown", function(text) {  // <1>
+    $scope.$watch("pageMarkdown", function(text) { 
       if (markdownRenderingPromise !== null) {
-        $timeout.cancel(markdownRenderingPromise);  // <3>
+        $timeout.cancel(markdownRenderingPromise);
       }
       markdownRenderingPromise = $timeout(function() {
         markdownRenderingPromise = null;
-        $http.post("/app/markdown", text).then(function(response) { // <4>
+        $http.post("/app/markdown", text).then(function(response) {
           $scope.updateRendering(response.data);
         });
-      }, 300); // <2>
+      }, 300);
     });
-    // end::live-rendering[]
-
   }]);
