@@ -18,7 +18,7 @@
 package io.vertx.guides.wiki.database;
 
 /**
- * @author <a href="https://julien.ponge.org/">Julien Ponge</a>
+ * @author Alain Lompo
  */
 public enum ErrorCodes {
   NO_ACTION_SPECIFIED,

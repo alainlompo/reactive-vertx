@@ -34,7 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * @author <a href="https://julien.ponge.org/">Julien Ponge</a>
+ * @author Alain Lompo
  */
 class WikiDatabaseServiceImpl implements WikiDatabaseService {
 
@@ -53,17 +53,14 @@ class WikiDatabaseServiceImpl implements WikiDatabaseService {
             .subscribe(RxHelper.toSubscriber(readyHandler));
   }
 
-  // tag::rx-get-connection[]
   private Single<SQLConnection> getConnection() {
     return dbClient.rxGetConnection().flatMap(conn -> {
-      Single<SQLConnection> connectionSingle = Single.just(conn); // <1>
-      return connectionSingle.doOnUnsubscribe(conn::close); // <2>
+      Single<SQLConnection> connectionSingle = Single.just(conn);
+      return connectionSingle.doOnUnsubscribe(conn::close);
     });
   }
-  // end::rx-get-connection[]
 
   @Override
-  // tag::rx-data-flow[]
   public WikiDatabaseService fetchAllPages(Handler<AsyncResult<JsonArray>> resultHandler) {
     dbClient.rxQuery(sqlQueries.get(SqlQuery.ALL_PAGES))
             .flatMapObservable(res -> {  // <1>
@@ -76,7 +73,6 @@ class WikiDatabaseServiceImpl implements WikiDatabaseService {
             .subscribe(RxHelper.toSubscriber(resultHandler));
     return this;
   }
-  // end::rx-data-flow[]
 
   @Override
   public WikiDatabaseService fetchPage(String name, Handler<AsyncResult<JsonObject>> resultHandler) {
@@ -98,10 +94,8 @@ class WikiDatabaseServiceImpl implements WikiDatabaseService {
 
   @Override
   public WikiDatabaseService fetchPageById(int id, Handler<AsyncResult<JsonObject>> resultHandler) {
-    // tag::rx-execute-query-with-params[]
     Single<ResultSet> resultSet = dbClient.rxQueryWithParams(
             sqlQueries.get(SqlQuery.GET_PAGE_BY_ID), new JsonArray().add(id));
-    // end::rx-execute-query-with-params[]
     resultSet
             .map(result -> {
               if (result.getNumRows() > 0) {
@@ -144,13 +138,11 @@ class WikiDatabaseServiceImpl implements WikiDatabaseService {
     return this;
   }
 
-  // tag::rxhelper-to-subscriber[]
   @Override
-  public WikiDatabaseService fetchAllPagesData(Handler<AsyncResult<List<JsonObject>>> resultHandler) { // <1>
+  public WikiDatabaseService fetchAllPagesData(Handler<AsyncResult<List<JsonObject>>> resultHandler) {
     dbClient.rxQuery(sqlQueries.get(SqlQuery.ALL_PAGES_DATA))
             .map(ResultSet::getRows)
-            .subscribe(RxHelper.toSubscriber(resultHandler));  // <2>
+            .subscribe(RxHelper.toSubscriber(resultHandler));
     return this;
   }
-  // end::rxhelper-to-subscriber[]
 }

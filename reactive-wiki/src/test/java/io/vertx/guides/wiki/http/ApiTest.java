@@ -45,9 +45,7 @@ public class ApiTest {
   private Vertx vertx;
   private WebClient webClient;
 
-  // tag::tokenField[]
   private String jwtTokenHeaderValue;
-  // end::tokenField[]
 
   @Before
   public void prepare(TestContext context) {
@@ -61,13 +59,11 @@ public class ApiTest {
 
     vertx.deployVerticle(new HttpServerVerticle(), context.asyncAssertSuccess());
 
-    // tag::test-https[]
     webClient = WebClient.create(vertx, new WebClientOptions()
       .setDefaultHost("localhost")
       .setDefaultPort(8080)
       .setSsl(true) // <1>
       .setTrustOptions(new JksOptions().setPath("server-keystore.jks").setPassword("secret"))); // <2>
-    // end::test-https[]
   }
 
   @After
@@ -75,7 +71,6 @@ public class ApiTest {
     vertx.close(context.asyncAssertSuccess());
   }
 
-  // tag::fetch-token[]
   @Test
   public void play_with_api(TestContext context) {
     Async async = context.async();
@@ -92,14 +87,11 @@ public class ApiTest {
           context.fail(ar.cause());
         }
       });
-      // (...)
-  // end::fetch-token[]
 
     JsonObject page = new JsonObject()
       .put("name", "Sample")
       .put("markdown", "# A page");
 
-    // tag::use-token[]
     Future<JsonObject> postRequest = Future.future();
     tokenRequest.compose(token -> {
       jwtTokenHeaderValue = "Bearer " + token;  // <1>
@@ -130,8 +122,6 @@ public class ApiTest {
           }
         });
     }, getRequest);
-    // (...)
-    // end::use-token[]
 
     Future<JsonObject> putRequest = Future.future();
     getRequest.compose(response -> {

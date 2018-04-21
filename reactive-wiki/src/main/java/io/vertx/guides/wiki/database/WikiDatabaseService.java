@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * @author <a href="https://julien.ponge.org/">Julien Ponge</a>
+ * @author Alain Lompo
  */
 @ProxyGen
 public interface WikiDatabaseService {

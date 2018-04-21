@@ -165,7 +165,7 @@ public class WikiDatabaseServiceVertxEBProxy implements WikiDatabaseService {
     return this;
   }
 
-  public WikiDatabaseService deletePage(int id, Handler<AsyncResult<Void>> resultHandler) {
+  public WikiDatabaseService rxDeletePage(int id, Handler<AsyncResult<Void>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return this;
@@ -173,7 +173,7 @@ public class WikiDatabaseServiceVertxEBProxy implements WikiDatabaseService {
     JsonObject _json = new JsonObject();
     _json.put("id", id);
     DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
-    _deliveryOptions.addHeader("action", "deletePage");
+    _deliveryOptions.addHeader("action", "rxDeletePage");
     _vertx.eventBus().<Void>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
         resultHandler.handle(Future.failedFuture(res.cause()));

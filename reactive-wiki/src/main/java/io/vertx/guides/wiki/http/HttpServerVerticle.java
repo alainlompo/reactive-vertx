@@ -30,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.net.JksOptions;
 import io.vertx.reactivex.ext.auth.AuthProvider;
-import io.vertx.reactivex.ext.auth.User;
 import io.vertx.reactivex.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTOptions;
 import io.vertx.reactivex.ext.auth.shiro.ShiroAuth;
@@ -83,22 +82,17 @@ public class HttpServerVerticle extends AbstractVerticle {
       .setSsl(true)
       .setUserAgent("vert-x3"));
 
-    // tag::https-server[]
     HttpServer server = vertx.createHttpServer(new HttpServerOptions()
       .setSsl(true)
       .setKeyStoreOptions(new JksOptions()
         .setPath("server-keystore.jks")
         .setPassword("secret")));
-    // end::https-server[]
 
-    // tag::shiro-auth[]
     AuthProvider auth = ShiroAuth.create(vertx, new ShiroAuthOptions()
       .setType(ShiroAuthRealmType.PROPERTIES)
       .setConfig(new JsonObject()
         .put("properties_path", "classpath:wiki-users.properties")));
-    // end::shiro-auth[]
 
-    // tag::shiro-routes[]
     Router router = Router.router(vertx);
 
     router.route().handler(CookieHandler.create());
@@ -117,9 +111,7 @@ public class HttpServerVerticle extends AbstractVerticle {
     router.post("/action/create").handler(this::pageCreateHandler);
     router.get("/action/backup").handler(this::backupHandler);
     router.post("/action/delete").handler(this::pageDeletionHandler);
-    // end::shiro-routes[]
 
-    // tag::shiro-login[]
     router.get("/login").handler(this::loginHandler);
     router.post("/login-auth").handler(FormLoginHandler.create(auth));  // <1>
 
@@ -130,9 +122,7 @@ public class HttpServerVerticle extends AbstractVerticle {
         .putHeader("Location", "/")
         .end();
     });
-    // end::shiro-login[]
 
-    // tag::jwtAuth[]
     Router apiRouter = Router.router(vertx);
 
     JWTAuth jwtAuth = JWTAuth.create(vertx, new JsonObject()
@@ -142,9 +132,7 @@ public class HttpServerVerticle extends AbstractVerticle {
         .put("password", "secret")));
 
     apiRouter.route().handler(JWTAuthHandler.create(jwtAuth, "/api/token"));
-    // end::jwtAuth[]
 
-    // tag::issue-jwt[]
     apiRouter.get("/token").handler(context -> {
 
       JsonObject creds = new JsonObject()
@@ -171,7 +159,6 @@ public class HttpServerVerticle extends AbstractVerticle {
         context.response().putHeader("Content-Type", "text/plain").end(token);
       }, t -> context.fail(401));
     });
-    // end::issue-jwt[]
 
     apiRouter.get("/pages").handler(this::apiRoot);
     apiRouter.get("/pages/:id").handler(this::apiGetPage);
@@ -196,7 +183,6 @@ public class HttpServerVerticle extends AbstractVerticle {
       });
   }
 
-  // tag::apiDeletePage[]
   private void apiDeletePage(RoutingContext context) {
     if (context.user().principal().getBoolean("canDelete", false)) {
       int id = Integer.valueOf(context.request().getParam("id"));
@@ -207,7 +193,6 @@ public class HttpServerVerticle extends AbstractVerticle {
       context.fail(401);
     }
   }
-  // end::apiDeletePage[]
 
   private void handleSimpleDbReply(RoutingContext context, AsyncResult<Void> reply) {
     if (reply.succeeded()) {
@@ -335,7 +320,6 @@ public class HttpServerVerticle extends AbstractVerticle {
     });
   }
 
-  // tag::indexHandler[]
   private void indexHandler(RoutingContext context) {
     context.user().isAuthorised("create", res -> {  // <1>
       boolean canCreatePage = res.succeeded() && res.result();  // <2>
@@ -359,7 +343,6 @@ public class HttpServerVerticle extends AbstractVerticle {
       });
     });
   }
-  // end::indexHandler[]
 
   private void pageRenderingHandler(RoutingContext context) {
     context.user().isAuthorised("update", updateResponse -> {
@@ -402,7 +385,6 @@ public class HttpServerVerticle extends AbstractVerticle {
     });
   }
 
-  // tag::loginHandler[]
   private void loginHandler(RoutingContext context) {
     context.put("title", "Login");
     templateEngine.render(context, "templates", "/login.ftl", ar -> {
@@ -414,7 +396,6 @@ public class HttpServerVerticle extends AbstractVerticle {
       }
     });
   }
-  // end::loginHandler[]
 
   private void pageUpdateHandler(RoutingContext context) {
     boolean pageCreation = "yes".equals(context.request().getParam("newPage"));
@@ -457,7 +438,6 @@ public class HttpServerVerticle extends AbstractVerticle {
     context.response().end();
   }
 
-  // tag::pageDeletionHandler[]
   private void pageDeletionHandler(RoutingContext context) {
     context.user().isAuthorised("delete", res -> {
       if (res.succeeded() && res.result()) {
@@ -478,7 +458,6 @@ public class HttpServerVerticle extends AbstractVerticle {
       }
     });
   }
-  // end::pageDeletionHandler[]
 
   private void backupHandler(RoutingContext context) {
     context.user().isAuthorised("role:writer", res -> {
