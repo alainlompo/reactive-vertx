@@ -40,13 +40,6 @@ public class MainVerticle extends AbstractVerticle {
 
   private final FreeMarkerTemplateEngine templateEngine = FreeMarkerTemplateEngine.create();
 
-  /*@Override
-  public void start() {
-    vertx.createHttpServer()
-        .requestHandler(req -> req.response().end("Hello Vert.x!"))
-        .listen(8080);
-  }*/
-
   /**
    * By having each method returning a Future object, the implementation of the start method
    * becomes a composition
@@ -58,6 +51,16 @@ public class MainVerticle extends AbstractVerticle {
     Future<Void> steps = prepareDatabase().compose(v -> startHttpServer());
     steps.setHandler(startFuture.completer());
   }
+
+  /*
+  // quick and simple starting illustration
+  @Override
+  public void start() {
+    vertx.createHttpServer()
+        .requestHandler(req -> req.response().end("Hello Vert.x!"))
+        .listen(8080);
+  }
+  */
 
   private Future<Void> prepareDatabase() {
     Future<Void> future = Future.future();
