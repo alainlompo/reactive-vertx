@@ -1,7 +1,5 @@
 = A minimally viable wiki written with Vert.x
 
-TIP: The corresponding source code is in the `step-1` folder of the guide repository.
-
 We are going to start with a first iteration and the simplest code possible to have a wiki written with Vert.x.
 While the next iterations will introduce more elegance into the code base as well as proper testing, we will see that quick prototyping with Vert.x is both a simple and a realistic target.
 
