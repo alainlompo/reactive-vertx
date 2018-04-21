@@ -39,8 +39,9 @@ import java.util.stream.Collectors;
 
 public class MainVerticle extends AbstractVerticle {
 
+  // Database queries
   private static final String SQL_CREATE_PAGES_TABLE = "create table if not exists Pages (Id integer identity primary key, Name varchar(255) unique, Content clob)";
-  private static final String SQL_GET_PAGE = "select Id, Content from Pages where Name = ?"; // <1>
+  private static final String SQL_GET_PAGE = "select Id, Content from Pages where Name = ?";
   private static final String SQL_CREATE_PAGE = "insert into Pages values (NULL, ?, ?)";
   private static final String SQL_SAVE_PAGE = "update Pages set Content = ? where Id = ?";
   private static final String SQL_ALL_PAGES = "select Name from Pages";
@@ -62,24 +63,24 @@ public class MainVerticle extends AbstractVerticle {
   private Future<Void> prepareDatabase() {
     Future<Void> future = Future.future();
 
-    dbClient = JDBCClient.createShared(vertx, new JsonObject()  // <1>
-      .put("url", "jdbc:hsqldb:file:db/wiki")   // <2>
-      .put("driver_class", "org.hsqldb.jdbcDriver")   // <3>
-      .put("max_pool_size", 30));   // <4>
+    dbClient = JDBCClient.createShared(vertx, new JsonObject()
+      .put("url", "jdbc:hsqldb:file:db/wiki")
+      .put("driver_class", "org.hsqldb.jdbcDriver")
+      .put("max_pool_size", 30));
 
-    dbClient.getConnection(ar -> {    // <5>
+    dbClient.getConnection(ar -> {
       if (ar.failed()) {
         LOGGER.error("Could not open a database connection", ar.cause());
-        future.fail(ar.cause());    // <6>
+        future.fail(ar.cause());
       } else {
-        SQLConnection connection = ar.result();   // <7>
+        SQLConnection connection = ar.result();
         connection.execute(SQL_CREATE_PAGES_TABLE, create -> {
-          connection.close();   // <8>
+          connection.close();
           if (create.failed()) {
             LOGGER.error("Database preparation error", create.cause());
             future.fail(create.cause());
           } else {
-            future.complete();  // <9>
+            future.complete();
           }
         });
       }
@@ -90,20 +91,20 @@ public class MainVerticle extends AbstractVerticle {
 
   private Future<Void> startHttpServer() {
     Future<Void> future = Future.future();
-    HttpServer server = vertx.createHttpServer();   // <1>
+    HttpServer server = vertx.createHttpServer();
 
-    Router router = Router.router(vertx);   // <2>
+    Router router = Router.router(vertx);
     router.get("/").handler(this::indexHandler);
-    router.get("/wiki/:page").handler(this::pageRenderingHandler); // <3>
-    router.post().handler(BodyHandler.create());  // <4>
+    router.get("/wiki/:page").handler(this::pageRenderingHandler);
+    router.post().handler(BodyHandler.create());
     router.post("/save").handler(this::pageUpdateHandler);
     router.post("/create").handler(this::pageCreateHandler);
     router.post("/delete").handler(this::pageDeletionHandler);
     router.post("/search").handler(this::pagesSearchHandler);
 
     server
-      .requestHandler(router::accept)   // <5>
-      .listen(9292, ar -> {   // <6>
+      .requestHandler(router::accept)
+      .listen(9292, ar -> {
         if (ar.succeeded()) {
           LOGGER.info("HTTP server running on port 9292");
           future.complete();
@@ -156,26 +157,26 @@ public class MainVerticle extends AbstractVerticle {
           connection.close();
 
           if (res.succeeded()) {
-            List<String> pages = res.result() // <1>
+            List<String> pages = res.result()
               .getResults()
               .stream()
               .map(json -> json.getString(0))
               .sorted()
               .collect(Collectors.toList());
 
-            context.put(TITLE_KEY, "Wikipeaks home");  // <2>
+            context.put(TITLE_KEY, "Wikipeaks home");
             context.put("pages", pages);
-            templateEngine.render(context, "templates", "/index.ftl", ar -> {   // <3>
+            templateEngine.render(context, "templates", "/index.ftl", ar -> {
               if (ar.succeeded()) {
                 context.response().putHeader("Content-Type", "text/html");
-                context.response().end(ar.result());  // <4>
+                context.response().end(ar.result());
               } else {
                 context.fail(ar.cause());
               }
             });
 
           } else {
-            context.fail(res.cause());  // <5>
+            context.fail(res.cause());
           }
         });
       } else {
@@ -188,22 +189,22 @@ public class MainVerticle extends AbstractVerticle {
     String id = context.request().getParam("id");   // <1>
     String title = context.request().getParam(TITLE_KEY);
     String markdown = context.request().getParam("markdown");
-    boolean newPage = "yes".equals(context.request().getParam("newPage"));  // <2>
+    boolean newPage = "yes".equals(context.request().getParam("newPage"));
 
     dbClient.getConnection(car -> {
       if (car.succeeded()) {
         SQLConnection connection = car.result();
         String sql = newPage ? SQL_CREATE_PAGE : SQL_SAVE_PAGE;
-        JsonArray params = new JsonArray();   // <3>
+        JsonArray params = new JsonArray();
         if (newPage) {
           params.add(title).add(markdown);
         } else {
           params.add(markdown).add(id);
         }
-        connection.updateWithParams(sql, params, res -> {   // <4>
+        connection.updateWithParams(sql, params, res -> {
           connection.close();
           if (res.succeeded()) {
-            context.response().setStatusCode(303);    // <5>
+            context.response().setStatusCode(303);
             context.response().putHeader(LOCATION_HEADER, "/wiki/" + title);
             context.response().end();
           } else {
@@ -258,13 +259,13 @@ public class MainVerticle extends AbstractVerticle {
   }
 
   private void pageRenderingHandler(RoutingContext context) {
-    String page = context.request().getParam("page");   // <1>
+    String page = context.request().getParam("page");
 
     dbClient.getConnection(car -> {
       if (car.succeeded()) {
 
         SQLConnection connection = car.result();
-        connection.queryWithParams(SQL_GET_PAGE, new JsonArray().add(page), fetch -> {  // <2>
+        connection.queryWithParams(SQL_GET_PAGE, new JsonArray().add(page), fetch -> {
           connection.close();
           if (fetch.succeeded()) {
 
@@ -279,7 +280,7 @@ public class MainVerticle extends AbstractVerticle {
             context.put("id", id);
             context.put("newPage", fetch.result().getResults().isEmpty() ? "yes" : "no");
             context.put("rawContent", rawContent);
-            context.put("content", Processor.process(rawContent));  // <3>
+            context.put("content", Processor.process(rawContent));
             context.put("timestamp", new Date().toString());
 
             templateEngine.render(context, "templates", "/page.ftl", ar -> {
@@ -310,7 +311,7 @@ public class MainVerticle extends AbstractVerticle {
   public void anotherStart(Future<Void> startFuture) {
 
     Future<Void> steps = prepareDatabase().compose(v -> startHttpServer());
-    steps.setHandler(ar -> {  // <1>
+    steps.setHandler(ar -> {
       if (ar.succeeded()) {
         startFuture.complete();
       } else {
