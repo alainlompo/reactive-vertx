@@ -120,9 +120,6 @@ public class WikiDatabaseVerticle extends AbstractVerticle {
         SEARCH_ALL_PAGES
     }
 
-
-
-    // TODO: Look for a better way to do this
     private void loadSqlQueries() throws IOException {
 
         String queriesFile = config().getString(CONFIG_WIKIDB_SQL_QUERIES_RESOURCE_FILE);
@@ -171,8 +168,6 @@ public class WikiDatabaseVerticle extends AbstractVerticle {
             }
         });
     }
-
-
 
     private void fetchAllPages(Message<JsonObject> message) {
         dbClient.query(sqlQueries.get(SqlQuery.ALL_PAGES), res -> {
@@ -259,6 +254,4 @@ public class WikiDatabaseVerticle extends AbstractVerticle {
         LOGGER.error("Database query error", cause);
         message.fail(ErrorCodes.DB_ERROR.ordinal(), cause.getMessage());
     }
-
-
 }
